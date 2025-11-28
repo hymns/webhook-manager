@@ -156,8 +156,9 @@ class DeploymentService
             if ($webhook->pre_deploy_script) {
                 $output[] = "\nRunning pre-deploy script...";
                 
-                // Trim each line to remove trailing spaces that cause "command not found" errors
-                $cleanedScript = implode("\n", array_map('trim', explode("\n", $webhook->pre_deploy_script)));
+                // Normalize line endings and trim each line to remove trailing spaces
+                $normalizedScript = str_replace(["\r\n", "\r"], "\n", $webhook->pre_deploy_script);
+                $cleanedScript = implode("\n", array_map('trim', explode("\n", $normalizedScript)));
                 
                 $command = $this->prepareCommandAsUser([
                     'bash', '-c', $cleanedScript
@@ -178,8 +179,9 @@ class DeploymentService
             if ($webhook->post_deploy_script) {
                 $output[] = "\nRunning post-deploy script...";
                 
-                // Trim each line to remove trailing spaces that cause "command not found" errors
-                $cleanedScript = implode("\n", array_map('trim', explode("\n", $webhook->post_deploy_script)));
+                // Normalize line endings and trim each line to remove trailing spaces
+                $normalizedScript = str_replace(["\r\n", "\r"], "\n", $webhook->post_deploy_script);
+                $cleanedScript = implode("\n", array_map('trim', explode("\n", $normalizedScript)));
                 
                 $command = $this->prepareCommandAsUser([
                     'bash', '-c', $cleanedScript
