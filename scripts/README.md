@@ -387,7 +387,7 @@ When you push new code changes:
 cd /var/www/webhook-manager
 
 # Pull latest changes
-sudo -u www-data git pull origin main
+sudo -u www-data git pull origin master
 
 # Install/update dependencies (if needed)
 sudo -u www-data composer install --no-dev --optimize-autoloader
