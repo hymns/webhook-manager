@@ -400,9 +400,12 @@ POOL;
         
         $result = Process::run($command);
 
+        // PHP-FPM -t outputs to stderr, so capture both stdout and stderr
+        $output = trim($result->output() . "\n" . $result->errorOutput());
+
         return [
             'success' => $result->successful(),
-            'output' => $result->output()
+            'output' => $output
         ];
     }
 }

@@ -568,9 +568,12 @@ HTML;
     {
         $result = Process::run($this->nginxConfigTest);
 
+        // Nginx -t outputs to stderr, so capture both stdout and stderr
+        $output = trim($result->output() . "\n" . $result->errorOutput());
+
         return [
             'success' => $result->successful(),
-            'output' => $result->output()
+            'output' => $output
         ];
     }
 
