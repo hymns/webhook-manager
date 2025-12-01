@@ -33,8 +33,8 @@ class NginxService
             // Production paths
             $this->nginxSitesAvailable = '/etc/nginx/sites-available';
             $this->nginxSitesEnabled = '/etc/nginx/sites-enabled';
-            $this->nginxConfigTest = 'nginx -t';
-            $this->nginxReload = 'systemctl reload nginx';
+            $this->nginxConfigTest = 'sudo /usr/sbin/nginx -t';
+            $this->nginxReload = 'sudo /bin/systemctl reload nginx';
         }
     }
 
