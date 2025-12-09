@@ -26,6 +26,18 @@ print_info() {
     echo -e "${YELLOW}→ $1${NC}"
 }
 
+print_warning() {
+    echo -e "${YELLOW}⚠ $1${NC}"
+}
+
+print_header() {
+    echo ""
+    echo -e "${GREEN}==========================================${NC}"
+    echo -e "${GREEN}$1${NC}"
+    echo -e "${GREEN}==========================================${NC}"
+    echo ""
+}
+
 check_root() {
     if [[ $EUID -ne 0 ]]; then
         print_error "This script must be run as root or with sudo"
@@ -152,25 +164,106 @@ mkdir -p /etc/pm2
 chmod 755 /etc/pm2
 print_success "PM2 config directory created"
 
-# Summary
+# Security Hardening
+print_header "Security Hardening"
+
+# Install fail2ban for brute-force protection
+print_info "Installing fail2ban (brute-force protection)..."
+if apt-get install -y fail2ban > /dev/null 2>&1; then
+    systemctl enable fail2ban > /dev/null 2>&1
+    systemctl start fail2ban > /dev/null 2>&1
+    print_success "fail2ban installed and enabled"
+else
+    print_warning "Failed to install fail2ban"
+fi
+
+# Configure UFW Firewall
+print_info "Configuring UFW firewall..."
+if command -v ufw &> /dev/null; then
+    # Allow essential services
+    ufw --force enable > /dev/null 2>&1
+    ufw default deny incoming > /dev/null 2>&1
+    ufw default allow outgoing > /dev/null 2>&1
+    ufw allow ssh > /dev/null 2>&1
+    ufw allow 'Nginx Full' > /dev/null 2>&1
+    print_success "UFW firewall configured (SSH, HTTP, HTTPS allowed)"
+else
+    print_warning "UFW not found, skipping firewall configuration"
+fi
+
+# Secure MySQL installation
+print_info "Securing MySQL installation..."
+if command -v mysql &> /dev/null; then
+    # Generate random root password
+    MYSQL_ROOT_PASS=$(openssl rand -base64 32)
+    
+    # Secure MySQL without interactive prompts
+    mysql --user=root <<_EOF_ > /dev/null 2>&1
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASS}';
+DELETE FROM mysql.user WHERE User='';
+DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+FLUSH PRIVILEGES;
+_EOF_
+    
+    if [ $? -eq 0 ]; then
+        # Save root password to file
+        echo "$MYSQL_ROOT_PASS" > /root/.mysql_root_password
+        chmod 600 /root/.mysql_root_password
+        print_success "MySQL secured (root password saved to /root/.mysql_root_password)"
+    else
+        print_warning "MySQL security configuration failed - run mysql_secure_installation manually"
+    fi
+else
+    print_warning "MySQL not found, skipping security configuration"
+fi
+
+print_success "Security hardening complete"
 echo ""
-print_success "=========================================="
-print_success "Prerequisites installation completed!"
-print_success "=========================================="
+
+print_info "⚠️  IMPORTANT SECURITY NOTES:"
 echo ""
-print_info "Installed components:"
-echo "  • Nginx"
-echo "  • PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4 with FPM"
-echo "  • Composer"
+echo "1. MySQL Root Password:"
+echo "   Password saved to: /root/.mysql_root_password"
+echo "   Keep this file secure! You'll need it for setup-app.sh"
+echo ""
+echo "2. Configure SSH security (recommended):"
+echo "   sudo nano /etc/ssh/sshd_config"
+echo "   - Set PermitRootLogin no"
+echo "   - Set PasswordAuthentication no (if using keys)"
+echo "   - Set Port 2222 (optional, non-standard port)"
+echo "   sudo systemctl restart sshd"
+echo ""
+echo "3. Review fail2ban configuration:"
+echo "   sudo nano /etc/fail2ban/jail.local"
+echo ""
+
+print_header "Installation Complete!"
+
+print_info "✅ Installed components:"
+echo "  • Nginx web server"
+echo "  • PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4 with PHP-FPM"
+echo "  • Composer (PHP package manager)"
 echo "  • Node.js 20 with npm (system-wide)"
-echo "  • PM2"
-echo "  • Redis"
-echo "  • MySQL"
-echo "  • Supervisor"
-echo "  • Certbot"
+echo "  • PM2 (Node.js process manager)"
+echo "  • Redis (cache & queue backend)"
+echo "  • MySQL (database server - SECURED)"
+echo "  • Supervisor (process management)"
+echo "  • Certbot (SSL certificates)"
+echo "  • fail2ban (brute-force protection)"
+echo "  • UFW firewall (configured)"
 echo ""
-print_info "Next steps:"
-echo "  1. Run: bash scripts/setup-sudoers.sh"
-echo "  2. Configure MySQL database"
-echo "  3. Clone and setup your Laravel application"
+print_info "🔒 Security configured:"
+echo "  • MySQL root password: /root/.mysql_root_password"
+echo "  • UFW firewall: SSH, HTTP, HTTPS allowed"
+echo "  • fail2ban: Enabled and monitoring"
+echo ""
+print_info "📋 Next steps:"
+echo "  1. sudo bash scripts/setup-2-sudoers.sh"
+echo "  2. Clone your app to /var/www/webhook-manager"
+echo "  3. sudo -u www-data bash scripts/setup-3-app.sh"
+echo "  4. sudo bash scripts/setup-4-webserver.sh"
+echo ""
+print_info "⏱️  Total time: ~15-20 minutes"
 echo ""

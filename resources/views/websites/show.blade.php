@@ -180,6 +180,128 @@
                 </div>
             </div>
 
+            @if($website->project_type === 'php' && !empty($website->php_settings))
+            <!-- PHP Hardening Settings -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="bi bi-gear"></i> PHP Hardening Settings</h5>
+                    <hr class="mt-0 mb-3">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            Memory Limit
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $website->php_settings['memory_limit'] ?? '256M' }}</code>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            Max Execution Time
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $website->php_settings['max_execution_time'] ?? '300' }}</code> seconds
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            Upload Max Filesize
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $website->php_settings['upload_max_filesize'] ?? '100M' }}</code>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            Post Max Size
+                        </div>
+                        <div class="col-md-8">
+                            <code>{{ $website->php_settings['post_max_size'] ?? '100M' }}</code>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            Function Security
+                        </div>
+                        <div class="col-md-8">
+                            @php
+                                $allDangerousFunctions = ['exec', 'passthru', 'shell_exec', 'system', 'proc_open', 'popen', 'curl_exec', 'curl_multi_exec', 'parse_ini_file', 'show_source'];
+                                
+                                $disabledFuncs = !empty($website->php_settings['disable_functions']) 
+                                    ? array_map('trim', explode(',', $website->php_settings['disable_functions']))
+                                    : $allDangerousFunctions;
+                                    
+                                $enabledFuncs = array_diff($allDangerousFunctions, $disabledFuncs);
+                            @endphp
+                            
+                            @if(count($enabledFuncs) > 0)
+                                <div class="mb-2">
+                                    <small class="text-danger"><strong>⚠️ Enabled (Security Risk):</strong></small>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @foreach($enabledFuncs as $func)
+                                            <span class="badge badge-pastel-orange"><code>{{ $func }}()</code></span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            @if(count($disabledFuncs) > 0)
+                                <div>
+                                    <small class="text-success"><strong>✓ Disabled (Secure):</strong></small>
+                                    <div class="d-flex flex-wrap gap-1 mt-1">
+                                        @foreach($disabledFuncs as $func)
+                                            <span class="badge badge-pastel-green"><code>{{ $func }}()</code></span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endif
+                            
+                            @if(count($disabledFuncs) === 0)
+                                <div class="alert alert-danger mb-0">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    <strong>Warning:</strong> All dangerous functions are enabled! This is not recommended.
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 text-muted">
+                            <i class="bi bi-folder-lock me-1"></i> Path Isolation
+                        </div>
+                        <div class="col-md-8">
+                            @if(!empty($website->php_settings['open_basedir']))
+                                <div class="badge badge-pastel-green mb-2">
+                                    <i class="bi bi-shield-check me-1"></i> Enabled
+                                </div>
+                                <div class="font-monospace small text-break">
+                                    {{ str_replace(':', ' : ', $website->php_settings['open_basedir']) }}
+                                </div>
+                                <small class="text-muted">PHP can only access files in these directories</small>
+                            @else
+                                <div class="badge badge-pastel-green mb-2">
+                                    <i class="bi bi-shield-check me-1"></i> Auto-configured
+                                </div>
+                                <div class="font-monospace small text-break text-muted">
+                                    {{ $website->root_path }} : /tmp : /usr/share/php : /usr/share/pear
+                                </div>
+                                <small class="text-muted">Default paths applied automatically</small>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <i class="bi bi-info-circle me-1"></i>
+                        <small>These settings are applied in the dedicated PHP-FPM pool: <code>{{ $website->php_pool_name ?? 'default' }}</code></small>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Timestamps -->
             <div class="card mb-4">
                 <div class="card-body">

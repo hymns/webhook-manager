@@ -134,6 +134,16 @@ class PhpFpmService
             $website->php_settings ?? []
         );
 
+        // Add open_basedir restriction for path isolation
+        if (!isset($settings['open_basedir'])) {
+            $settings['open_basedir'] = implode(':', [
+                $website->root_path,
+                '/tmp',
+                '/usr/share/php',
+                '/usr/share/pear',
+            ]);
+        }
+
         $phpAdmin = $this->buildPhpAdminValues($settings);
         
         // Environment-aware paths
@@ -166,7 +176,9 @@ pm.max_requests = 500
 ; PHP settings
 {$phpAdmin}
 
-; Security: Chroot (optional, commented by default)
+; Security: Path isolation via open_basedir (configured above)
+; Note: open_basedir restricts file operations to allowed paths only
+; Chroot is available but requires complex filesystem setup:
 ; chroot = {$website->root_path}
 
 ; Access log

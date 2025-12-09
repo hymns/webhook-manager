@@ -4,10 +4,10 @@ Automated installation scripts for easy deployment on Ubuntu servers.
 
 ## 📋 Scripts Overview
 
-### 1. `setup-ubuntu.sh`
+### 1. `setup-1-ubuntu.sh`
 Installs all system prerequisites and dependencies.
 
-**Note:** Installs Node.js 20 system-wide. For multiple Node.js versions, see `setup-nvm-for-user.sh` below.
+**Note:** Installs Node.js 20 system-wide. For multiple Node.js versions, see `setup-5-nvm-for-user.sh` below.
 
 **Installs:**
 - Nginx web server
@@ -22,7 +22,7 @@ Installs all system prerequisites and dependencies.
 
 **Usage:**
 ```bash
-sudo bash scripts/setup-ubuntu.sh
+sudo bash scripts/setup-1-ubuntu.sh
 ```
 
 **Requirements:** Must be run as root or with sudo
@@ -30,7 +30,7 @@ sudo bash scripts/setup-ubuntu.sh
 
 ---
 
-### 2. `setup-sudoers.sh`
+### 2. `setup-2-sudoers.sh`
 Configures passwordless sudo permissions for required commands.
 
 **Configures permissions for:**
@@ -45,10 +45,10 @@ Configures passwordless sudo permissions for required commands.
 **Usage:**
 ```bash
 # For www-data user (default)
-sudo bash scripts/setup-sudoers.sh
+sudo bash scripts/setup-2-sudoers.sh
 
 # For custom web server user
-sudo bash scripts/setup-sudoers.sh your-user
+sudo bash scripts/setup-2-sudoers.sh your-user
 ```
 
 **Requirements:** Must be run as root or with sudo
@@ -56,7 +56,7 @@ sudo bash scripts/setup-sudoers.sh your-user
 
 ---
 
-### 3. `setup-app.sh`
+### 3. `setup-3-app.sh`
 Sets up the Laravel application and its dependencies.
 
 **Performs:**
@@ -75,10 +75,10 @@ Sets up the Laravel application and its dependencies.
 **Usage:**
 ```bash
 # Run as www-data user (recommended)
-sudo -u www-data bash scripts/setup-app.sh
+sudo -u www-data bash scripts/setup-3-app.sh
 
 # Or from project directory
-bash scripts/setup-app.sh
+bash scripts/setup-3-app.sh
 ```
 
 **Requirements:** Must be run from application directory
@@ -86,7 +86,34 @@ bash scripts/setup-app.sh
 
 ---
 
-### 4. `setup-nvm-for-user.sh` (Optional)
+### 4. `setup-4-webserver.sh` (Recommended)
+Automates web server configuration, SSL setup, and service startup.
+
+**Performs:**
+- Creates hardened Nginx configuration
+- Enables site and tests configuration  
+- Requests SSL certificate from Let's Encrypt (optional)
+- Starts queue workers and scheduler
+- Verifies all services are running
+
+**Usage:**
+```bash
+cd /var/www/webhook-manager
+sudo bash scripts/setup-4-webserver.sh
+```
+
+**Interactive prompts:**
+- Domain name
+- Include www subdomain (y/n)
+- Setup SSL certificate (y/n)
+- Email for SSL notifications
+
+**Requirements:** Run after `setup-3-app.sh` and database configuration
+**Time:** ~2-5 minutes (SSL certificate request may take longer)
+
+---
+
+### 5. `setup-5-nvm-for-user.sh` (Optional)
 Installs NVM (Node Version Manager) for a specific user, providing multiple Node.js versions.
 
 **Installs:**
@@ -98,10 +125,10 @@ Installs NVM (Node Version Manager) for a specific user, providing multiple Node
 **Usage:**
 ```bash
 # Install for www-data user (default)
-sudo bash scripts/setup-nvm-for-user.sh www-data
+sudo bash scripts/setup-5-nvm-for-user.sh www-data
 
 # Install for custom user
-sudo bash scripts/setup-nvm-for-user.sh username
+sudo bash scripts/setup-5-nvm-for-user.sh username
 ```
 
 **When to use:**
@@ -114,7 +141,7 @@ sudo bash scripts/setup-nvm-for-user.sh username
 - All apps are containerized (Docker manages versions)
 - All apps run on Node.js 20
 
-**Requirements:** Run after `setup-ubuntu.sh`
+**Requirements:** Run after `setup-1-ubuntu.sh`
 **Time:** ~5-10 minutes
 
 ---
@@ -151,7 +178,7 @@ cd setup
 **4. Install system prerequisites**
 ```bash
 # This installs Nginx, PHP, MySQL, Redis, Node.js, Supervisor, etc.
-bash scripts/setup-ubuntu.sh
+bash scripts/setup-1-ubuntu.sh
 ```
 
 **⏱️ Wait ~15-20 minutes for installation to complete**
@@ -159,48 +186,29 @@ bash scripts/setup-ubuntu.sh
 **5. Configure sudo permissions**
 ```bash
 # This allows www-data to manage services without password
-bash scripts/setup-sudoers.sh
+bash scripts/setup-2-sudoers.sh
 ```
 
-**6. Secure MySQL installation**
+**6. MySQL Setup (Now Automated!)**
+
+MySQL security is now **automatically configured** by `setup-1-ubuntu.sh`:
+- ✅ Random root password generated
+- ✅ Anonymous users removed
+- ✅ Remote root login disabled
+- ✅ Test database removed
+
+**Important:** MySQL root password saved to `/root/.mysql_root_password`
+
+To view the password (you'll need it for setup-3-app.sh):
 ```bash
-mysql_secure_installation
+sudo cat /root/.mysql_root_password
 ```
 
-Follow prompts:
-- Set password policy and security options: (skip validation for easier setup)
-- Remove anonymous users: Yes
-- Disallow root login remotely: Yes
-- Remove test database: Yes
-- Reload privilege tables: Yes
-
-**7. Create database and user**
-```bash
-mysql -u root -p
-```
-
-```sql
-CREATE DATABASE webhook_manager CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'webhook_user'@'localhost' IDENTIFIED BY 'your_secure_password';
-
--- Grant privileges on webhook_manager database
-GRANT ALL PRIVILEGES ON webhook_manager.* TO 'webhook_user'@'localhost';
-
--- Grant privileges to create databases and users for deployed projects
-GRANT CREATE, DROP, ALTER ON *.* TO 'webhook_user'@'localhost';
-GRANT CREATE USER ON *.* TO 'webhook_user'@'localhost';
-GRANT RELOAD ON *.* TO 'webhook_user'@'localhost';
-
--- Allow webhook_user to grant privileges to databases it creates
-GRANT ALL PRIVILEGES ON `%`.* TO 'webhook_user'@'localhost' WITH GRANT OPTION;
-
-FLUSH PRIVILEGES;
-EXIT;
-```
+**Note:** Database and user for the application will be created automatically in Phase 2
 
 ---
 
-### Phase 2: Application Setup
+### Phase 2 & 3: Application and Database Setup (Automated)
 
 **8. Clone to production location**
 ```bash
@@ -214,48 +222,57 @@ chown -R www-data:www-data /var/www/webhook-manager
 chmod -R 755 /var/www/webhook-manager
 ```
 
-**10. Run application setup as www-data user**
+**10. Run automated application setup**
 ```bash
 cd /var/www/webhook-manager
-sudo -u www-data bash scripts/setup-app.sh
+sudo -u www-data bash scripts/setup-3-app.sh
 ```
 
-**During setup, you'll be prompted:**
-- Run migrations now? → Answer **n** (we'll do this after configuring .env)
+**The script will prompt for:**
 
-**⏱️ Wait ~5-10 minutes for npm build to complete**
+1. **Database Setup** (y/n) - Recommended: **y**
+   - Database name (default: webhook_manager)
+   - Database user (default: webhook_user)
+   - Database password (required)
+   - MySQL root password (required)
 
----
+2. **Run Migrations** (y/n) - Recommended: **y**
+   - Automatically runs after database created
 
-### Phase 3: Configuration
+3. **Create Admin User** (y/n) - Recommended: **y**
+   - Admin name (default: Admin)
+   - Admin email (required)
+   - Admin password (required)
 
-**11. Configure environment file**
+**What it does automatically:**
+- ✅ Installs Composer dependencies
+- ✅ Generates Laravel APP_KEY
+- ✅ Creates MySQL database and user
+- ✅ Updates .env with database credentials
+- ✅ Tests database connection
+- ✅ Runs database migrations
+- ✅ Creates admin user
+- ✅ Builds frontend assets (Vite)
+- ✅ Creates Supervisor configs
+- ✅ Optimizes application
+
+**⏱️ Takes ~5-10 minutes** (npm build takes longest)
+
+**Manual .env configuration (optional):**
+
+If you need to customize additional settings:
 ```bash
 sudo -u www-data nano /var/www/webhook-manager/.env
 ```
 
-**Update these critical values:**
+Common settings to customize:
 ```env
 APP_NAME="Git Webhook Manager"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-domain.com
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=webhook_manager
-DB_USERNAME=webhook_user
-DB_PASSWORD=your_secure_password
-
-QUEUE_CONNECTION=redis
-CACHE_DRIVER=redis
-SESSION_DRIVER=redis
-
-REDIS_HOST=127.0.0.1
-REDIS_PASSWORD=null
-REDIS_PORT=6379
-
+# Mail settings (for notifications)
 MAIL_MAILER=smtp
 MAIL_HOST=your-smtp-host
 MAIL_PORT=587
@@ -263,72 +280,139 @@ MAIL_USERNAME=your-email@domain.com
 MAIL_PASSWORD=your-email-password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@your-domain.com
-MAIL_FROM_NAME="${APP_NAME}"
-```
 
-**12. Run database migrations**
-```bash
-cd /var/www/webhook-manager
-sudo -u www-data php artisan optimize:clear
-sudo -u www-data php artisan migrate --force
-```
-
-**13. Create admin user**
-```bash
-sudo -u www-data php artisan tinker
-```
-
-```php
-$user = new App\Models\User();
-$user->name = 'Admin';
-$user->email = 'admin@your-domain.com';
-$user->password = Hash::make('secure_password_here');
-$user->save();
-exit
+# Redis (already configured by default)
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
 ```
 
 ---
 
-### Phase 4: Web Server Configuration
+### Phase 4: Web Server Configuration (Automated)
 
-**14. Create Nginx configuration**
+**14. Run automated web server setup**
+```bash
+cd /var/www/webhook-manager
+sudo bash scripts/setup-4-webserver.sh
+```
+
+**The script will prompt for:**
+- Domain name (e.g., webhook.example.com)
+- Include www subdomain? (y/n)
+- Setup SSL certificate? (y/n)
+- Email for SSL notifications
+
+**What it does automatically:**
+- ✅ Creates hardened Nginx configuration
+- ✅ Enables site and tests configuration
+- ✅ Requests SSL certificate from Let's Encrypt (optional)
+- ✅ Starts queue workers and scheduler
+- ✅ Verifies all services are running
+
+**⏱️ Takes ~2-5 minutes** (SSL certificate request may take longer)
+
+---
+
+### Phase 4: Manual Web Server Configuration (Alternative)
+
+**If you prefer manual setup, follow these steps:**
+
+**14a. Create Nginx configuration**
 ```bash
 sudo nano /etc/nginx/sites-available/webhook-manager
 ```
 
-**Paste this configuration:**
+**Paste this hardened configuration:**
 ```nginx
 server {
     listen 80;
+    listen [::]:80;
     server_name your-domain.com www.your-domain.com;
     root /var/www/webhook-manager/public;
 
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header X-Content-Type-Options "nosniff";
-
-    index index.php;
-
+    index index.php index.html;
     charset utf-8;
 
+    # Logging
+    access_log /var/log/nginx/webhook-manager-access.log;
+    error_log /var/log/nginx/webhook-manager-error.log;
+
+    # Security: Limit request body size
+    client_max_body_size 100M;
+    client_body_buffer_size 128k;
+
+    # Security: Timeouts
+    client_body_timeout 12;
+    client_header_timeout 12;
+    keepalive_timeout 15;
+    send_timeout 10;
+
+    # Security Headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
+    
+    # Hide Nginx version
+    server_tokens off;
+
+    # Main location
     location / {
         try_files $uri $uri/ /index.php?$query_string;
     }
 
-    location = /favicon.ico { access_log off; log_not_found off; }
-    location = /robots.txt  { access_log off; log_not_found off; }
-
-    error_page 404 /index.php;
-
+    # PHP processing
     location ~ \.php$ {
         fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         include fastcgi_params;
         fastcgi_hide_header X-Powered-By;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
     }
 
-    location ~ /\.(?!well-known).* {
+    # Security: Deny access to hidden files
+    location ~ /\. {
         deny all;
+        access_log off;
+        log_not_found off;
     }
+
+    # Security: Deny access to sensitive files
+    location ~* \.(env|log|md|sql|sqlite|conf|ini|bak|old|tmp|swp)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Security: Deny access to common exploit files
+    location ~* (\.(git|svn|hg|bzr)|composer\.(json|lock)|package(-lock)?\.json|Dockerfile|nginx\.conf)$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Optimize: Static file caching
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # Security: Disable logging for favicon and robots
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+
+    # Error page
+    error_page 404 /index.php;
 }
 ```
 
@@ -447,21 +531,25 @@ sudo -u www-data php artisan migrate
 php artisan migrate
 ```
 
-### Setup Scripts Order
-1. **First:** `setup-ubuntu.sh` (installs system packages)
-2. **Second:** `setup-sudoers.sh` (configures permissions)
-3. **Third:** `setup-app.sh` (sets up Laravel application)
-4. **Optional:** `setup-nvm-for-user.sh` (for multiple Node.js versions)
+### Setup Scripts Order (Recommended)
+1. **First:** `setup-1-ubuntu.sh` (installs system packages + security hardening)
+2. **Second:** `setup-2-sudoers.sh` (configures sudo permissions)
+3. **Third:** `setup-3-app.sh` (sets up Laravel + database + admin user - **AUTOMATED**)
+4. **Fourth:** `setup-4-webserver.sh` (configures Nginx + SSL + starts services - **AUTOMATED**)
+5. **Optional:** `setup-5-nvm-for-user.sh` (for multiple Node.js versions)
+
+**Total time:** ~25-35 minutes
+**Manual steps:** Minimal (just answer prompts)
 
 ### Multiple Node.js Versions (Optional)
 
-The default `setup-ubuntu.sh` installs **Node.js 20 system-wide**, which is sufficient for most use cases including Laravel Vite builds.
+The default `setup-1-ubuntu.sh` installs **Node.js 20 system-wide**, which is sufficient for most use cases including Laravel Vite builds.
 
 **However, if you need multiple Node.js versions** (e.g., for PM2-managed apps requiring specific versions):
 
 ```bash
 # Install NVM for www-data user
-sudo bash scripts/setup-nvm-for-user.sh www-data
+sudo bash scripts/setup-5-nvm-for-user.sh www-data
 ```
 
 **This provides:**
@@ -506,7 +594,7 @@ pm2 start app.js --name "app-node20"
 exit
 ```
 
-**Note:** System-wide Node.js (from `setup-ubuntu.sh`) and NVM can coexist:
+**Note:** System-wide Node.js (from `setup-1-ubuntu.sh`) and NVM can coexist:
 - System Node 20: Used by default for `sudo -u www-data npm run build`
 - NVM versions: Available when you login as www-data with `sudo -u www-data -i`
 
@@ -538,7 +626,7 @@ sudo apt-get update --fix-missing
 ps aux | grep nginx
 
 # Re-run sudoers script with correct user
-sudo bash scripts/setup-sudoers.sh www-data
+sudo bash scripts/setup-2-sudoers.sh www-data
 ```
 
 ### Database connection errors

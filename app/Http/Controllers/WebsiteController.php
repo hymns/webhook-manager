@@ -137,6 +137,29 @@ class WebsiteController extends Controller
             $validated['working_directory'] = '/';
         }
 
+        // Process PHP settings for PHP projects
+        if ($validated['project_type'] === 'php') {
+            $phpSettings = $validated['php_settings'] ?? [];
+            
+            // All dangerous functions that should be disabled by default
+            $allDangerousFunctions = [
+                'exec', 'passthru', 'shell_exec', 'system', 
+                'proc_open', 'popen', 'curl_exec', 'curl_multi_exec',
+                'parse_ini_file', 'show_source'
+            ];
+            
+            // Get functions user wants to ENABLE
+            $enabledFunctions = $request->input('enabled_functions', []);
+            
+            // Calculate which functions to DISABLE (all dangerous minus enabled)
+            $disabledFunctions = array_diff($allDangerousFunctions, $enabledFunctions);
+            
+            // Store disabled functions in settings
+            $phpSettings['disable_functions'] = implode(',', $disabledFunctions);
+            
+            $validated['php_settings'] = $phpSettings;
+        }
+
         $sslChanged = $request->boolean('ssl_enabled', false) !== $website->ssl_enabled;
         
         $validated['ssl_enabled'] = $request->boolean('ssl_enabled', $website->ssl_enabled);

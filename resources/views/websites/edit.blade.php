@@ -207,6 +207,158 @@
                     </div>
                 </div>
 
+                @if($website->project_type === 'php')
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-gear me-2"></i> PHP Hardening Settings
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small mb-3">
+                            <i class="bi bi-info-circle me-1"></i> Customize PHP settings for this website. Default security settings will be applied if not specified.
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="memory_limit" class="form-label">Memory Limit</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="memory_limit" 
+                                        name="php_settings[memory_limit]" 
+                                        value="{{ old('php_settings.memory_limit', $website->php_settings['memory_limit'] ?? '256M') }}"
+                                        placeholder="256M"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="max_execution_time" class="form-label">Max Execution Time (seconds)</label>
+                                    <input 
+                                        type="number" 
+                                        class="form-control" 
+                                        id="max_execution_time" 
+                                        name="php_settings[max_execution_time]" 
+                                        value="{{ old('php_settings.max_execution_time', $website->php_settings['max_execution_time'] ?? '300') }}"
+                                        placeholder="300"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="upload_max_filesize" class="form-label">Upload Max Filesize</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="upload_max_filesize" 
+                                        name="php_settings[upload_max_filesize]" 
+                                        value="{{ old('php_settings.upload_max_filesize', $website->php_settings['upload_max_filesize'] ?? '100M') }}"
+                                        placeholder="100M"
+                                    >
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="post_max_size" class="form-label">Post Max Size</label>
+                                    <input 
+                                        type="text" 
+                                        class="form-control" 
+                                        id="post_max_size" 
+                                        name="php_settings[post_max_size]" 
+                                        value="{{ old('php_settings.post_max_size', $website->php_settings['post_max_size'] ?? '100M') }}"
+                                        placeholder="100M"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-shield-lock me-1"></i> Enable Dangerous Functions 
+                                <small class="text-danger">(Security Risk)</small>
+                            </label>
+                            <div class="form-text mb-2">
+                                <strong>All dangerous functions are disabled by default.</strong> Only enable functions if your application specifically requires them.
+                            </div>
+                            
+                            @php
+                                $dangerousFunctions = [
+                                    'exec' => 'Execute external programs',
+                                    'passthru' => 'Execute external programs and display raw output',
+                                    'shell_exec' => 'Execute command via shell',
+                                    'system' => 'Execute external program and display output',
+                                    'proc_open' => 'Open a process file pointer',
+                                    'popen' => 'Open process file pointer',
+                                    'curl_exec' => 'Execute CURL session',
+                                    'curl_multi_exec' => 'Execute CURL multi sessions',
+                                    'parse_ini_file' => 'Parse configuration file',
+                                    'show_source' => 'Display source code',
+                                ];
+                                
+                                // Get currently disabled functions
+                                $currentDisabled = [];
+                                if (!empty($website->php_settings['disable_functions'])) {
+                                    $currentDisabled = explode(',', $website->php_settings['disable_functions']);
+                                } else {
+                                    // Default: all dangerous functions disabled
+                                    $currentDisabled = array_keys($dangerousFunctions);
+                                }
+                                
+                                // Calculate currently enabled (inverse of disabled)
+                                $currentEnabled = array_diff(array_keys($dangerousFunctions), $currentDisabled);
+                            @endphp
+                            
+                            <div class="row">
+                                @foreach($dangerousFunctions as $func => $desc)
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input 
+                                                class="form-check-input" 
+                                                type="checkbox" 
+                                                name="enabled_functions[]" 
+                                                value="{{ $func }}"
+                                                id="func_{{ $func }}"
+                                                {{ in_array($func, $currentEnabled) ? 'checked' : '' }}
+                                            >
+                                            <label class="form-check-label small" for="func_{{ $func }}">
+                                                <code>{{ $func }}()</code>
+                                                <br><small class="text-muted">{{ $desc }}</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="open_basedir" class="form-label">
+                                <i class="bi bi-folder-lock me-1"></i> Path Isolation (open_basedir)
+                                <small class="text-success">(Security Feature)</small>
+                            </label>
+                            <textarea 
+                                class="form-control font-monospace" 
+                                id="open_basedir" 
+                                name="php_settings[open_basedir]" 
+                                rows="3"
+                                placeholder="{{ $website->root_path }}:/tmp:/usr/share/php:/usr/share/pear"
+                            >{{ old('php_settings.open_basedir', $website->php_settings['open_basedir'] ?? '') }}</textarea>
+                            <div class="form-text">
+                                <strong>Path jail:</strong> Restricts PHP file operations to these directories only (colon-separated).
+                                Leave empty for automatic configuration: website root + /tmp + PHP libraries.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Note:</strong> Changes will be applied when you redeploy the website configuration.
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 <div class="card">
                     <div class="card-header">
                         <i class="bi bi-shield-check me-2"></i> Security & Status

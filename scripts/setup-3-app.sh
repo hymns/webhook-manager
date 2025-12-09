@@ -85,16 +85,163 @@ chmod -R 755 "$APP_DIR/storage"
 chmod -R 755 "$APP_DIR/bootstrap/cache"
 print_success "Permissions set"
 
-# Run database migrations
-print_info "Running database migrations..."
-read -p "Run migrations now? (y/n): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    php artisan migrate --force > /dev/null 2>&1
-    print_success "Migrations completed"
+# Database Setup
+print_header "Database Configuration"
+echo ""
+read -p "Setup database automatically? (y/n, default: y): " SETUP_DB
+SETUP_DB=${SETUP_DB:-y}
+
+if [[ "$SETUP_DB" =~ ^[Yy]$ ]]; then
+    print_info "Database setup - please provide details:"
+    echo ""
+    
+    # Get database details
+    read -p "Database name (default: webhook_manager): " DB_NAME
+    DB_NAME=${DB_NAME:-webhook_manager}
+    
+    read -p "Database user (default: webhook_user): " DB_USER
+    DB_USER=${DB_USER:-webhook_user}
+    
+    read -sp "Database password: " DB_PASS
+    echo ""
+    
+    if [ -z "$DB_PASS" ]; then
+        print_error "Password cannot be empty!"
+        exit 1
+    fi
+    
+    read -p "MySQL root password: " -s MYSQL_ROOT_PASS
+    echo ""
+    
+    if [ -z "$MYSQL_ROOT_PASS" ]; then
+        print_error "MySQL root password cannot be empty!"
+        exit 1
+    fi
+    
+    # Create database and user
+    print_info "Creating database and user..."
+    
+    mysql -u root -p"$MYSQL_ROOT_PASS" << MYSQL_SCRIPT > /dev/null 2>&1
+CREATE DATABASE IF NOT EXISTS \`$DB_NAME\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASS';
+GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USER'@'localhost';
+GRANT CREATE, DROP, ALTER ON *.* TO '$DB_USER'@'localhost';
+GRANT CREATE USER ON *.* TO '$DB_USER'@'localhost';
+GRANT RELOAD ON *.* TO '$DB_USER'@'localhost';
+GRANT ALL PRIVILEGES ON \`%\`.* TO '$DB_USER'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+MYSQL_SCRIPT
+    
+    if [ $? -eq 0 ]; then
+        print_success "Database '$DB_NAME' and user '$DB_USER' created"
+        
+        # Update .env file
+        print_info "Updating .env file with database credentials..."
+        
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/DB_DATABASE=.*/DB_DATABASE=$DB_NAME/" "$APP_DIR/.env"
+            sed -i '' "s/DB_USERNAME=.*/DB_USERNAME=$DB_USER/" "$APP_DIR/.env"
+            sed -i '' "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" "$APP_DIR/.env"
+        else
+            # Linux
+            sed -i "s/DB_DATABASE=.*/DB_DATABASE=$DB_NAME/" "$APP_DIR/.env"
+            sed -i "s/DB_USERNAME=.*/DB_USERNAME=$DB_USER/" "$APP_DIR/.env"
+            sed -i "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASS/" "$APP_DIR/.env"
+        fi
+        
+        print_success ".env file updated with database credentials"
+        
+        # Test database connection
+        print_info "Testing database connection..."
+        if php artisan db:show > /dev/null 2>&1; then
+            print_success "Database connection successful!"
+        else
+            print_error "Database connection failed - please check credentials"
+        fi
+    else
+        print_error "Failed to create database - please check MySQL root password"
+        print_info "You can create database manually and update .env file"
+    fi
 else
-    print_info "Skipped migrations - run manually with: php artisan migrate"
+    print_info "Skipped database setup - configure manually in .env file"
 fi
+
+echo ""
+
+# Run database migrations
+print_header "Database Migrations"
+echo ""
+
+# Check if database is configured
+if grep -q "DB_DATABASE=webhook_manager" "$APP_DIR/.env"; then
+    read -p "Run migrations now? (y/n, default: y): " RUN_MIGRATIONS
+    RUN_MIGRATIONS=${RUN_MIGRATIONS:-y}
+    
+    if [[ "$RUN_MIGRATIONS" =~ ^[Yy]$ ]]; then
+        print_info "Running database migrations..."
+        if php artisan migrate --force > /dev/null 2>&1; then
+            print_success "Migrations completed"
+            
+            # Create admin user
+            echo ""
+            read -p "Create admin user now? (y/n, default: y): " CREATE_ADMIN
+            CREATE_ADMIN=${CREATE_ADMIN:-y}
+            
+            if [[ "$CREATE_ADMIN" =~ ^[Yy]$ ]]; then
+                print_info "Admin user creation:"
+                echo ""
+                
+                read -p "Admin name (default: Admin): " ADMIN_NAME
+                ADMIN_NAME=${ADMIN_NAME:-Admin}
+                
+                read -p "Admin email: " ADMIN_EMAIL
+                if [ -z "$ADMIN_EMAIL" ]; then
+                    print_error "Email cannot be empty!"
+                else
+                    read -sp "Admin password: " ADMIN_PASS
+                    echo ""
+                    
+                    if [ -z "$ADMIN_PASS" ]; then
+                        print_error "Password cannot be empty!"
+                    else
+                        print_info "Creating admin user..."
+                        
+                        php artisan tinker << TINKER_SCRIPT > /dev/null 2>&1
+\$user = new App\Models\User();
+\$user->name = '$ADMIN_NAME';
+\$user->email = '$ADMIN_EMAIL';
+\$user->password = Hash::make('$ADMIN_PASS');
+\$user->save();
+exit
+TINKER_SCRIPT
+                        
+                        if [ $? -eq 0 ]; then
+                            print_success "Admin user created successfully!"
+                            echo ""
+                            print_info "Admin credentials:"
+                            echo "  Email: $ADMIN_EMAIL"
+                            echo "  Password: [hidden]"
+                        else
+                            print_error "Failed to create admin user"
+                            print_info "Create manually: php artisan tinker"
+                        fi
+                    fi
+                fi
+            else
+                print_info "Skipped admin creation - create manually later"
+            fi
+        else
+            print_error "Migrations failed"
+        fi
+    else
+        print_info "Skipped migrations - run manually with: php artisan migrate"
+    fi
+else
+    print_info "Database not configured in .env - skipping migrations"
+fi
+
+echo ""
 
 # Build frontend assets
 if [ -f "$APP_DIR/package.json" ]; then
