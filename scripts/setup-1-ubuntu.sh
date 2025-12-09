@@ -201,7 +201,15 @@ if command -v ufw &> /dev/null; then
     ufw default allow outgoing > /dev/null 2>&1
     ufw allow ssh > /dev/null 2>&1
     ufw allow 'Nginx Full' > /dev/null 2>&1
+    
+    # Database ports (commented out by default for security)
+    # Uncomment these if you need remote database access
+    # ufw allow 3306/tcp  # MySQL
+    # ufw allow 6379/tcp  # Redis
+    
     print_success "UFW firewall configured (SSH, HTTP, HTTPS allowed)"
+    print_info "Database ports (3306, 6379) are blocked by default"
+    print_info "Use Firewall module in web UI to allow specific IPs if needed"
 else
     print_warning "UFW not found, skipping firewall configuration"
 fi

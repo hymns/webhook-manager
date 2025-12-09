@@ -218,6 +218,14 @@ if grep -q "DB_DATABASE=webhook_manager" "$APP_DIR/.env"; then
         if php artisan migrate --force > /dev/null 2>&1; then
             print_success "Migrations completed"
             
+            # Seed default firewall rules
+            print_info "Seeding default firewall rules..."
+            if php artisan db:seed --class=FirewallRuleSeeder --force > /dev/null 2>&1; then
+                print_success "Default firewall rules seeded (SSH, HTTP, HTTPS)"
+            else
+                print_warning "Failed to seed firewall rules - you can add them manually"
+            fi
+            
             # Create admin user
             echo ""
             
