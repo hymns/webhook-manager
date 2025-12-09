@@ -67,36 +67,38 @@
                             <!-- Service Info -->
                             <div class="service-info mb-3">
                                 <div class="row g-2 small">
-                                    <div class="col-6">
-                                        <div class="text-muted">Status</div>
-                                        <div class="fw-semibold">
-                                            @if($service['is_active'])
-                                                <span class="text-success">Active</span>
-                                            @else
-                                                <span class="text-danger">Inactive</span>
-                                            @endif
+                                    @if($service['cpu'] !== null || $service['memory'] !== null)
+                                        <div class="col-6">
+                                            <div class="text-muted"><i class="bi bi-cpu"></i> CPU</div>
+                                            <div class="fw-semibold">{{ $service['cpu'] ?? '0.0' }}%</div>
                                         </div>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="text-muted">Auto-start</div>
-                                        <div class="fw-semibold">
-                                            @if($service['is_enabled'])
-                                                <span class="text-success">Enabled</span>
-                                            @else
-                                                <span class="text-warning">Disabled</span>
-                                            @endif
+                                        <div class="col-6">
+                                            <div class="text-muted"><i class="bi bi-memory"></i> RAM</div>
+                                            <div class="fw-semibold">{{ $service['memory'] ?? '0.0' }}%</div>
                                         </div>
-                                    </div>
+                                    @endif
                                     @if($service['pid'])
                                         <div class="col-6">
-                                            <div class="text-muted">PID</div>
+                                            <div class="text-muted"># PID</div>
                                             <div class="fw-semibold">{{ $service['pid'] }}</div>
                                         </div>
                                     @endif
                                     @if($service['uptime'])
-                                        <div class="col-12">
-                                            <div class="text-muted">Uptime</div>
+                                        <div class="col-6">
+                                            <div class="text-muted"><i class="bi bi-clock"></i> Since</div>
                                             <div class="fw-semibold small">{{ $service['uptime'] }}</div>
+                                        </div>
+                                    @endif
+                                    @if($service['is_enabled'] !== null)
+                                        <div class="col-12">
+                                            <div class="text-muted"><i class="bi bi-power"></i> Auto-start</div>
+                                            <div class="fw-semibold">
+                                                @if($service['is_enabled'])
+                                                    <span class="badge badge-pastel-green">Enabled</span>
+                                                @else
+                                                    <span class="badge badge-pastel-yellow">Disabled</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     @endif
                                 </div>

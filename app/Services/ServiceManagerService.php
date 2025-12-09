@@ -148,9 +148,24 @@ class ServiceManagerService
             // Parse PID and uptime
             $pid = null;
             $uptime = null;
+            $cpu = null;
+            $memory = null;
 
             if (preg_match('/Main PID: (\d+)/', $statusOutput, $matches)) {
                 $pid = $matches[1];
+                
+                // Get CPU and memory usage for this PID
+                $psResult = Process::run("ps -p {$pid} -o %cpu,%mem 2>&1 | tail -1");
+                if ($psResult->successful()) {
+                    $psOutput = trim($psResult->output());
+                    if ($psOutput && !str_contains($psOutput, 'error')) {
+                        $parts = preg_split('/\s+/', $psOutput);
+                        if (count($parts) >= 2) {
+                            $cpu = floatval($parts[0]);
+                            $memory = floatval($parts[1]);
+                        }
+                    }
+                }
             }
 
             if (preg_match('/Active: active \(running\) since (.+?);/', $statusOutput, $matches)) {
@@ -163,6 +178,8 @@ class ServiceManagerService
                 'is_enabled' => $isEnabled,
                 'pid' => $pid,
                 'uptime' => $uptime,
+                'cpu' => $cpu,
+                'memory' => $memory,
             ];
 
         } catch (Exception $e) {
@@ -172,6 +189,8 @@ class ServiceManagerService
                 'is_enabled' => false,
                 'pid' => null,
                 'uptime' => null,
+                'cpu' => null,
+                'memory' => null,
                 'error' => $e->getMessage(),
             ];
         }
