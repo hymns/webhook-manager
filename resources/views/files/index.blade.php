@@ -284,8 +284,10 @@ function chmodItem(path, perms) {
     new bootstrap.Modal(document.getElementById('chmodModal')).show();
 }
 
-function deleteItem(path, type) {
-    if (confirm(`Delete this ${type}? This action cannot be undone.`)) {
+async function deleteItem(path, type) {
+    const confirmed = await confirmDelete(`Delete this ${type}? This action cannot be undone!`);
+    
+    if (confirmed) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route('files.delete') }}';

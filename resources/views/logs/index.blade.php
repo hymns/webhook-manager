@@ -44,9 +44,9 @@
 <!-- Actions -->
 <div class="mb-3">
     @if($logType === 'laravel')
-        <form action="{{ route('logs.clear') }}" method="POST" class="d-inline">
+        <form id="clear-laravel-log-form" action="{{ route('logs.clear') }}" method="POST" class="d-inline">
             @csrf
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Clear Laravel log?')">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete('Clear Laravel log? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('clear-laravel-log-form').submit(); })">
                 <i class="bi bi-trash"></i> Clear Laravel Log
             </button>
         </form>

@@ -118,7 +118,7 @@
                                     </a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger" href="#" 
-                                           onclick="event.preventDefault(); if(confirm('Delete {{ $database->name }}? This action cannot be undone!')) document.getElementById('delete-form-{{ $database->id }}').submit();">
+                                           onclick="event.preventDefault(); confirmDelete('Delete {{ $database->name }}? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('delete-form-{{ $database->id }}').submit(); });">
                                         <i class="bi bi-trash me-2"></i>Delete
                                     </a></li>
                                 </ul>

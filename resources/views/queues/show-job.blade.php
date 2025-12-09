@@ -6,10 +6,10 @@
 
 @section('page-actions')
     <div class="d-flex gap-2">
-        <form action="{{ route('queues.delete-job', $job['id']) }}" method="POST">
+        <form id="delete-job-detail-form" action="{{ route('queues.delete-job', $job['id']) }}" method="POST">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this job?')">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-job-detail-form').submit(); })">
                 <i class="bi bi-trash me-1"></i> Delete Job
             </button>
         </form>
@@ -87,10 +87,10 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <form action="{{ route('queues.delete-job', $job['id']) }}" method="POST">
+                        <form id="delete-job-sidebar-form" action="{{ route('queues.delete-job', $job['id']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Delete this job?')">
+                            <button type="button" class="btn btn-danger w-100" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-job-sidebar-form').submit(); })">
                                 <i class="bi bi-trash me-2"></i>Delete Job
                             </button>
                         </form>

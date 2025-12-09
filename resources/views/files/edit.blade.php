@@ -206,8 +206,10 @@ textarea.addEventListener('keydown', function(e) {
     }
 });
 
-function deleteFile() {
-    if (confirm('Are you sure you want to delete this file?')) {
+async function deleteFile() {
+    const confirmed = await confirmDelete('Are you sure you want to delete this file? This action cannot be undone!');
+    
+    if (confirmed) {
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = '{{ route('files.delete') }}';

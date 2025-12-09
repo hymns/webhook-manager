@@ -143,9 +143,9 @@
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="bi bi-key me-2"></i> SSH Key</span>
-                        <form action="{{ route('webhooks.generate-ssh-key', $webhook) }}" method="POST" class="d-inline" onsubmit="return confirm('Regenerate SSH key? You will need to update the key in your Git provider.')">
+                        <form id="regenerate-ssh-form" action="{{ route('webhooks.generate-ssh-key', $webhook) }}" method="POST" class="d-inline">
                             @csrf
-                            <button type="submit" class="btn btn-sm btn-outline-warning">
+                            <button type="button" class="btn btn-sm btn-outline-warning" onclick="confirmAction('Regenerate SSH Key?', 'You will need to update the key in your Git provider.', 'Yes, regenerate!', 'warning').then(confirmed => { if(confirmed) document.getElementById('regenerate-ssh-form').submit(); })">
                                 <i class="bi bi-arrow-clockwise me-1"></i> Regenerate
                             </button>
                         </form>

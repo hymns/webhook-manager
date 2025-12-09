@@ -12,10 +12,10 @@
                 <i class="bi bi-arrow-clockwise me-1"></i> Retry Job
             </button>
         </form>
-        <form action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST">
+        <form id="delete-failed-job-detail-form" action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this job?')">
+            <button type="button" class="btn btn-danger" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-failed-job-detail-form').submit(); })">
                 <i class="bi bi-trash me-1"></i> Delete
             </button>
         </form>
@@ -104,10 +104,10 @@
                                 <i class="bi bi-arrow-clockwise me-2"></i>Retry This Job
                             </button>
                         </form>
-                        <form action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST">
+                        <form id="delete-failed-job-sidebar-form" action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-danger w-100" onclick="return confirm('Delete this job?')">
+                            <button type="button" class="btn btn-danger w-100" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-failed-job-sidebar-form').submit(); })">
                                 <i class="bi bi-trash me-2"></i>Delete Job
                             </button>
                         </form>

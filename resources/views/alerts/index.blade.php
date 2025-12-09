@@ -64,10 +64,10 @@
                                     <a href="{{ route('alerts.edit', $rule) }}" class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('alerts.destroy', $rule) }}" method="POST" class="d-inline">
+                                    <form id="delete-alert-rule-{{ $rule->id }}" action="{{ route('alerts.destroy', $rule) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this rule?')">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Delete this alert rule? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('delete-alert-rule-{{ $rule->id }}').submit(); })">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

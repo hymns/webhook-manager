@@ -65,10 +65,10 @@
                                     <a href="{{ route('cron-jobs.edit', $job) }}" class="btn btn-sm btn-primary">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <form action="{{ route('cron-jobs.destroy', $job) }}" method="POST" class="d-inline">
+                                    <form id="delete-cron-job-{{ $job->id }}" action="{{ route('cron-jobs.destroy', $job) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this cron job?')">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Delete this cron job? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('delete-cron-job-{{ $job->id }}').submit(); })">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

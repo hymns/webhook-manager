@@ -240,7 +240,7 @@
                                     </a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item text-danger" href="#" 
-                                           onclick="event.preventDefault(); if(confirm('Delete {{ $website->name }}?')) document.getElementById('delete-form-{{ $website->id }}').submit();">
+                                           onclick="event.preventDefault(); confirmDelete('Delete {{ $website->name }}? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('delete-form-{{ $website->id }}').submit(); });">
                                         <i class="bi bi-trash me-2"></i>Delete
                                     </a></li>
                                 </ul>
@@ -362,8 +362,9 @@
             }
         }
 
-        function redeployWebsite(id) {
-            if (confirm('Redeploy this website configuration?')) {
+        async function redeployWebsite(id) {
+            const confirmed = await confirmAction('Redeploy Website?', 'Regenerate and redeploy Nginx and PHP-FPM configurations?', 'Yes, redeploy!', 'question');
+            if (confirmed) {
                 document.getElementById(`redeploy-form-${id}`).submit();
             }
         }

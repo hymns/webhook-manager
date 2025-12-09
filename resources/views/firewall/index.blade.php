@@ -95,10 +95,10 @@
                                 </td>
                                 <td>
                                     @if(!$rule->is_system)
-                                        <form action="{{ route('firewall.destroy', $rule) }}" method="POST" class="d-inline">
+                                        <form id="delete-firewall-rule-{{ $rule->id }}" action="{{ route('firewall.destroy', $rule) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this rule?')">
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmDelete('Delete this firewall rule?').then(confirmed => { if(confirmed) document.getElementById('delete-firewall-rule-{{ $rule->id }}').submit(); })">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

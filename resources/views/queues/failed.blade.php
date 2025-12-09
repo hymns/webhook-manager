@@ -7,16 +7,16 @@
 @section('page-actions')
     <div class="btn-group">
         @if(!empty($jobs))
-            <form action="{{ route('queues.retry-all-failed') }}" method="POST" class="d-inline">
+            <form id="retry-all-failed-form" action="{{ route('queues.retry-all-failed') }}" method="POST" class="d-inline">
                 @csrf
-                <button type="submit" class="btn btn-warning" onclick="return confirm('Retry all failed jobs?')">
+                <button type="button" class="btn btn-warning" onclick="confirmAction('Retry All Failed Jobs?', 'All failed jobs will be retried.', 'Yes, retry all!', 'question').then(confirmed => { if(confirmed) document.getElementById('retry-all-failed-form').submit(); })">
                     <i class="bi bi-arrow-clockwise me-1"></i> Retry All
                 </button>
             </form>
-            <form action="{{ route('queues.clear-failed') }}" method="POST" class="d-inline">
+            <form id="clear-all-failed-form" action="{{ route('queues.clear-failed') }}" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Clear all failed jobs? This cannot be undone!')">
+                <button type="button" class="btn btn-danger" onclick="confirmDelete('Clear all failed jobs? This action cannot be undone!').then(confirmed => { if(confirmed) document.getElementById('clear-all-failed-form').submit(); })">
                     <i class="bi bi-trash me-1"></i> Clear All
                 </button>
             </form>
@@ -74,10 +74,10 @@
                                                     <i class="bi bi-arrow-clockwise"></i>
                                                 </button>
                                             </form>
-                                            <form action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST" style="display: inline;">
+                                            <form id="delete-failed-{{ $job['uuid'] }}" action="{{ route('queues.delete-failed-job', $job['uuid']) }}" method="POST" style="display: inline;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this job?')">
+                                                <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-failed-{{ $job['uuid'] }}').submit(); })">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
                                             </form>

@@ -56,10 +56,10 @@
                                                 <i class="bi bi-search"></i>
                                             </a>
                                             @if(config('queue.default') !== 'redis')
-                                                <form action="{{ route('queues.delete-job', $job['id']) }}" method="POST" style="display: inline;">
+                                                <form id="delete-pending-job-form-{{ $job['id'] }}" action="{{ route('queues.delete-job', $job['id']) }}" method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-outline-danger" title="Delete" onclick="return confirm('Delete this job?')">
+                                                    <button type="button" class="btn btn-outline-danger" title="Delete" onclick="confirmDelete('Delete this job?').then(confirmed => { if(confirmed) document.getElementById('delete-pending-job-form-{{ $job['id'] }}').submit(); })">
                                                         <i class="bi bi-trash"></i>
                                                     </button>
                                                 </form>
