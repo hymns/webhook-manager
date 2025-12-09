@@ -22,7 +22,7 @@ class ServiceManagerService
             'name' => 'Redis',
             'service' => 'redis-server',
             'supports_reload' => false,
-            'icon' => 'leaf',
+            'icon' => 'lightning',
         ],
         'mysql' => [
             'name' => 'MySQL',
