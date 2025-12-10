@@ -110,34 +110,31 @@ $WEB_USER ALL=(ALL) NOPASSWD: /bin/chown $WEB_USER?$WEB_USER /var/log/php-fpm.lo
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod [0-9]* /var/log/php[78].[0-9]*-fpm[/]*
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod [0-9]* /var/log/php-fpm.log
 
-# File Management - PHP-FPM pool configs
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/7.4/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/8.0/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/8.1/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/8.2/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/8.3/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/php/8.4/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/php/[78].[0-9]*/fpm/pool.d/[a-z]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/php/[78].[0-9]*/fpm/pool.d/[a-z]*.conf
+# File Management - PHP-FPM Pool Config Files (supports domain names with dots, underscores, hyphens)
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
 
-# File Management - Nginx Config Files
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/nginx/sites-available/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/nginx/sites-available/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/ln -sf /etc/nginx/sites-available/[a-z]* /etc/nginx/sites-enabled/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-available/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-enabled/[a-z]*
+# File Management - Nginx Config Files (supports domain names with dots, underscores, hyphens)
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/ln -sf /etc/nginx/sites-available/[a-zA-Z0-9._-]* /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
 
-# Webroot Directory Management
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown -R $WEB_USER?$WEB_USER /var/www/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod -R 755 /var/www/[a-z]*
+# Webroot Directory Management (supports letters, numbers, underscores, dots, hyphens)
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod -R [0-9]* /var/www/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -rf /var/www/[a-zA-Z0-9._-]*
 
-# PM2 Configuration Management (Node.js)
+# PM2 Configuration Management (Node.js - supports domain names with dots, underscores, hyphens)
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /etc/pm2
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 755 /etc/pm2
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-z]* /etc/pm2/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/pm2/[a-z]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/pm2/[a-z]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/pm2/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/pm2/[a-zA-Z0-9._-]*
+$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/pm2/[a-zA-Z0-9._-]*
 
 # PM2 Process Control (Node.js)
 $WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/pm2

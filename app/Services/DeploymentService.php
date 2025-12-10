@@ -96,6 +96,28 @@ class DeploymentService
             }
 
             // Check if directory exists
+            if (File::isDirectory($localPath)) {
+                // Check if it's a git repository
+                if (!File::isDirectory($localPath . '/.git')) {
+                    // Directory exists but not a git repo - check if empty
+                    $files = File::allFiles($localPath);
+                    $directories = File::directories($localPath);
+                    
+                    if (empty($files) && empty($directories)) {
+                        // Empty directory - delete it so we can clone fresh
+                        $output[] = "Removing empty directory: {$localPath}";
+                        $result = Process::run(['sudo', 'rm', '-rf', $localPath]);
+                        
+                        if ($result->failed()) {
+                            throw new \Exception("Failed to remove directory: " . $result->errorOutput());
+                        }
+                    } else {
+                        throw new \Exception("Directory {$localPath} exists but is not a git repository and contains files. Please remove it manually.");
+                    }
+                }
+            }
+            
+            // Clone or pull repository
             if (!File::isDirectory($localPath)) {
                 // Clone repository
                 $output[] = "Cloning repository...";
