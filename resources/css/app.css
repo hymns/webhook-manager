@@ -1123,3 +1123,11 @@ canvas {
     font-size: 0.75rem;
     color: #6b7280;
 }
+
+.file-manager-breadcrumb {
+    font-size: 0.8125rem;
+}
+
+.file-manager-breadcrumb .breadcrumb-item a {
+    font-size: 0.8125rem;
+}

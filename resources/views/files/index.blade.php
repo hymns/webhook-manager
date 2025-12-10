@@ -21,7 +21,7 @@
 <div class="card mb-3">
     <div class="card-body py-2">
         <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
+            <ol class="breadcrumb mb-0 file-manager-breadcrumb">
                 <li class="breadcrumb-item">
                     <a href="{{ route('files.index', ['path' => '/']) }}" class="text-decoration-none">
                         <i class="bi bi-hdd"></i> Root
