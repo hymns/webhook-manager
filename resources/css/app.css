@@ -1087,3 +1087,39 @@ canvas {
     color: #6b7280;
     flex-shrink: 0;
 }
+
+/* ============================================
+   File Manager Styles
+   ============================================ */
+.file-manager-table {
+    font-size: 0.875rem;
+}
+
+.file-manager-table td,
+.file-manager-table th {
+    padding: 0.625rem 0.75rem;
+}
+
+.file-manager-folder-name {
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.file-manager-file-name {
+    font-weight: 400;
+    color: #3c3c3c;
+}
+
+.file-manager-permissions {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.file-manager-size {
+    font-size: 0.8125rem;
+}
+
+.file-manager-modified {
+    font-size: 0.75rem;
+    color: #6b7280;
+}

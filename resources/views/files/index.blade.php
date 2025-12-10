@@ -50,7 +50,7 @@
 <div class="card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
+            <table class="table table-hover mb-0 file-manager-table">
                 <thead class="bg-light">
                     <tr>
                         <th style="width: 50%">Name</th>
@@ -77,23 +77,23 @@
                                 @if($item['type'] === 'directory')
                                     <a href="{{ route('files.index', ['path' => $item['path']]) }}" class="text-decoration-none">
                                         <i class="bi bi-folder-fill text-warning me-2"></i>
-                                        <strong>{{ $item['name'] }}</strong>
+                                        <span class="file-manager-folder-name">{{ $item['name'] }}</span>
                                     </a>
                                 @else
                                     <i class="bi bi-file-earmark text-secondary me-2"></i>
-                                    {{ $item['name'] }}
+                                    <span class="file-manager-file-name">{{ $item['name'] }}</span>
                                 @endif
-                                <small class="text-muted ms-2">{{ $item['permissions'] }}</small>
+                                <span class="file-manager-permissions ms-2">{{ $item['permissions'] }}</span>
                             </td>
-                            <td>
+                            <td class="file-manager-size">
                                 @if($item['type'] === 'file')
                                     {{ $item['size'] }}
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
                             </td>
-                            <td>
-                                <small>{{ $item['modified'] }}</small>
+                            <td class="file-manager-modified">
+                                {{ $item['modified'] }}
                             </td>
                             <td>
                                 <div class="btn-group btn-group-sm">
