@@ -190,6 +190,15 @@ server {
         access_log off;
         log_not_found off;
     }
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_min_length 1000;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript image/svg+xml;
+    gzip_disable "MSIE [1-6]\.";
 }
 NGINX;
     }
@@ -297,6 +306,15 @@ server {
         access_log off;
         log_not_found off;
     }
+    
+    # Gzip compression
+    gzip on;
+    gzip_vary on;
+    gzip_comp_level 6;
+    gzip_min_length 1000;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json application/javascript image/svg+xml;
+    gzip_disable "MSIE [1-6]\.";
 }
 NGINX;
     }
