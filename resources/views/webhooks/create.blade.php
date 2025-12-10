@@ -142,7 +142,7 @@
 
                         <div class="mb-3">
                             <label for="post_deploy_script" class="form-label">Post-Deploy Script</label>
-                            <textarea class="form-control font-monospace @error('post_deploy_script') is-invalid @enderror" id="post_deploy_script" name="post_deploy_script" rows="4" placeholder="#!/bin/bash&#10;composer install --no-dev&#10;php artisan migrate --force&#10;npm install && npm run build">{{ old('post_deploy_script') }}</textarea>
+                            <textarea class="form-control font-monospace @error('post_deploy_script') is-invalid @enderror" id="post_deploy_script" name="post_deploy_script" rows="5" placeholder="#!/bin/bash&#10;/usr/bin/php8.3 /usr/bin/composer install --no-dev&#10;/usr/bin/php8.3 artisan migrate --force&#10;/usr/bin/php8.3 artisan config:cache&#10;npm install && npm run build">{{ old('post_deploy_script') }}</textarea>
                             <div class="form-text">Script to run after deployment (e.g., composer install, migrations, build assets)</div>
                             @error('post_deploy_script')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -180,6 +180,21 @@
                         <li>Clearing cache</li>
                         <li>Restarting services</li>
                     </ul>
+
+                    <h6 class="mt-3">PHP Paths by Version</h6>
+                    <p class="small">Use specific PHP version in deploy scripts:</p>
+                    <ul class="small mb-0" style="font-family: monospace; font-size: 0.8rem;">
+                        <li>/usr/bin/php7.4</li>
+                        <li>/usr/bin/php8.0</li>
+                        <li>/usr/bin/php8.1</li>
+                        <li>/usr/bin/php8.2</li>
+                        <li>/usr/bin/php8.3</li>
+                        <li>/usr/bin/php8.4</li>
+                    </ul>
+                    <p class="small mt-2 mb-0">Laravel Example:</p>
+                    <code class="small d-block bg-white p-2 rounded mb-2">/usr/bin/php8.3 artisan migrate</code>
+                    <p class="small mt-2 mb-0">Composer Example:</p>
+                    <code class="small d-block bg-white p-2 rounded">/usr/bin/php8.3 /usr/bin/composer install</code>
 
                     <h6 class="mt-3">Security</h6>
                     <p class="small">Each webhook gets a unique secret token for verification. Never share your webhook URLs publicly.</p>

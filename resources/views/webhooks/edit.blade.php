@@ -157,6 +157,21 @@
                     <h6 class="mt-3">Deploy Scripts</h6>
                     <p class="small">Test your deploy scripts carefully. Errors in scripts can cause deployments to fail. Check deployment logs for debugging.</p>
 
+                    <h6 class="mt-3">PHP Paths by Version</h6>
+                    <p class="small">Use specific PHP version in deploy scripts:</p>
+                    <ul class="small mb-0" style="font-family: monospace; font-size: 0.8rem;">
+                        <li>/usr/bin/php7.4</li>
+                        <li>/usr/bin/php8.0</li>
+                        <li>/usr/bin/php8.1</li>
+                        <li>/usr/bin/php8.2</li>
+                        <li>/usr/bin/php8.3</li>
+                        <li>/usr/bin/php8.4</li>
+                    </ul>
+                    <p class="small mt-2 mb-0">Laravel Example:</p>
+                    <code class="small d-block bg-white p-2 rounded mb-2">/usr/bin/php8.3 artisan migrate</code>
+                    <p class="small mt-2 mb-0">Composer Example:</p>
+                    <code class="small d-block bg-white p-2 rounded">/usr/bin/php8.3 /usr/bin/composer install</code>
+
                     <h6 class="mt-3">SSH Key</h6>
                     <p class="small">The SSH key remains the same when editing. To regenerate, delete and recreate the webhook.</p>
                 </div>
