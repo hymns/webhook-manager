@@ -76,6 +76,18 @@ class LogViewerController extends Controller
                     $logFile = "/var/log/php{$website->php_version}-fpm/{$poolName}-slow.log";
                 }
                 break;
+            case 'website-laravel':
+                if ($website && $website->project_type === 'php') {
+                    $laravelLogPath = rtrim($website->working_directory ?: $website->root_path, '/') . '/storage/logs/laravel.log';
+                    if (file_exists($laravelLogPath)) {
+                        $logFile = $laravelLogPath;
+                    } else {
+                        session()->flash('warning', "Laravel log not found at: {$laravelLogPath}");
+                    }
+                } elseif ($website && $website->project_type !== 'php') {
+                    session()->flash('warning', 'Laravel logs are only available for PHP websites.');
+                }
+                break;
         }
 
         if ($logFile) {

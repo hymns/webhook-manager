@@ -43,6 +43,7 @@
                         <option value="website-nginx-error" {{ $logType === 'website-nginx-error' ? 'selected' : '' }}>→ Nginx Error</option>
                         <option value="website-php-access" {{ $logType === 'website-php-access' ? 'selected' : '' }}>→ PHP-FPM Access</option>
                         <option value="website-php-slow" {{ $logType === 'website-php-slow' ? 'selected' : '' }}>→ PHP-FPM Slow Queries</option>
+                        <option value="website-laravel" {{ $logType === 'website-laravel' ? 'selected' : '' }}>→ Laravel Log (PHP only)</option>
                     </optgroup>
                 </select>
             </div>
