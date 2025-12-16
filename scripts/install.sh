@@ -245,6 +245,8 @@ $WEB_USER ALL=(ALL) NOPASSWD: /bin/systemctl start php*-fpm
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/systemctl stop php*-fpm
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/systemctl reload php*-fpm
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/systemctl restart php*-fpm
+$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t
+$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t *
 
 # File Management - PHP-FPM Pool Config Files
 $WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
