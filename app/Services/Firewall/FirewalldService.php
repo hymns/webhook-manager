@@ -24,9 +24,9 @@ class FirewalldService extends AbstractFirewallService
 
     public function enable(): array
     {
-        // Start and enable firewalld
-        $this->runCommand('sudo /bin/systemctl start firewalld');
-        $result = $this->runCommand('sudo /bin/systemctl enable firewalld');
+        // Start and enable firewalld (RHEL uses /usr/bin/systemctl)
+        $this->runCommand('sudo /usr/bin/systemctl start firewalld');
+        $result = $this->runCommand('sudo /usr/bin/systemctl enable firewalld');
         
         return [
             'success' => $result['success'],
@@ -38,8 +38,8 @@ class FirewalldService extends AbstractFirewallService
 
     public function disable(): array
     {
-        $this->runCommand('sudo /bin/systemctl stop firewalld');
-        $result = $this->runCommand('sudo /bin/systemctl disable firewalld');
+        $this->runCommand('sudo /usr/bin/systemctl stop firewalld');
+        $result = $this->runCommand('sudo /usr/bin/systemctl disable firewalld');
         
         return [
             'success' => $result['success'],
