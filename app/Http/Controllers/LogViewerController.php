@@ -9,6 +9,61 @@ use Illuminate\Support\Facades\Process;
 
 class LogViewerController extends Controller
 {
+    protected string $osFamily;
+
+    public function __construct()
+    {
+        $this->osFamily = $this->detectOsFamily();
+    }
+
+    /**
+     * Detect OS family (debian or rhel)
+     */
+    protected function detectOsFamily(): string
+    {
+        if (file_exists('/etc/redhat-release')) {
+            return 'rhel';
+        }
+        
+        if (file_exists('/etc/os-release')) {
+            $content = file_get_contents('/etc/os-release');
+            if (preg_match('/ID_LIKE=.*rhel|ID_LIKE=.*fedora|ID=.*rocky|ID=.*alma|ID=.*centos/i', $content)) {
+                return 'rhel';
+            }
+        }
+        
+        return 'debian';
+    }
+
+    /**
+     * Get PHP-FPM log path based on OS
+     */
+    protected function getPhpFpmLogPath(): string
+    {
+        if ($this->osFamily === 'rhel') {
+            // Try to find the latest PHP version log
+            $phpVersions = ['84', '83', '82', '81', '80', '74'];
+            foreach ($phpVersions as $ver) {
+                $logPath = "/var/opt/remi/php{$ver}/log/php-fpm/error.log";
+                if (file_exists($logPath)) {
+                    return $logPath;
+                }
+            }
+            return '/var/opt/remi/php84/log/php-fpm/error.log';
+        }
+        return '/var/log/php-fpm.log';
+    }
+
+    /**
+     * Get system log path based on OS
+     */
+    protected function getSystemLogPath(): string
+    {
+        if ($this->osFamily === 'rhel') {
+            return '/var/log/messages';
+        }
+        return '/var/log/syslog';
+    }
     /**
      * Display log viewer
      */
@@ -47,10 +102,10 @@ class LogViewerController extends Controller
                 $logFile = '/var/log/nginx/error.log';
                 break;
             case 'php-fpm':
-                $logFile = '/var/log/php-fpm.log';
+                $logFile = $this->getPhpFpmLogPath();
                 break;
             case 'system':
-                $logFile = '/var/log/syslog';
+                $logFile = $this->getSystemLogPath();
                 break;
             
             // Website-specific logs
