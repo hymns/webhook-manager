@@ -2,7 +2,9 @@
 
 @section('title', 'Firewall - Hostiqo')
 @section('page-title', 'Firewall')
-@section('page-description', 'Manage {{ $firewallType === "firewalld" ? "firewalld" : "UFW" }} firewall rules and network security')
+@section('page-description')
+Manage {{ $firewallType === 'firewalld' ? 'firewalld' : 'UFW' }} firewall rules and network security
+@endsection
 
 @section('page-actions')
     @if($firewallStatus['enabled'] ?? false)
