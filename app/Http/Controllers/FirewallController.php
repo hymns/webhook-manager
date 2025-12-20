@@ -21,9 +21,10 @@ class FirewallController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $ufwStatus = $this->firewall->getUfwStatus();
+        $firewallStatus = $this->firewall->getStatus();
+        $firewallType = $this->firewall->getFirewallType();
 
-        return view('firewall.index', compact('rules', 'ufwStatus'));
+        return view('firewall.index', compact('rules', 'firewallStatus', 'firewallType'));
     }
 
     /**
@@ -76,11 +77,11 @@ class FirewallController extends Controller
     }
 
     /**
-     * Enable UFW
+     * Enable Firewall
      */
     public function enable()
     {
-        $result = $this->firewall->enableUfw();
+        $result = $this->firewall->enable();
 
         if (!$result['success']) {
             return back()->with('error', 'Failed to enable firewall: ' . ($result['error'] ?? 'Unknown error'));
@@ -90,11 +91,11 @@ class FirewallController extends Controller
     }
 
     /**
-     * Disable UFW
+     * Disable Firewall
      */
     public function disable()
     {
-        $result = $this->firewall->disableUfw();
+        $result = $this->firewall->disable();
 
         if (!$result['success']) {
             return back()->with('error', 'Failed to disable firewall: ' . ($result['error'] ?? 'Unknown error'));
@@ -104,11 +105,11 @@ class FirewallController extends Controller
     }
 
     /**
-     * Reset UFW (delete all rules)
+     * Reset Firewall (delete all rules)
      */
     public function reset()
     {
-        $result = $this->firewall->resetUfw();
+        $result = $this->firewall->reset();
 
         if (!$result['success']) {
             return back()->with('error', 'Failed to reset firewall: ' . ($result['error'] ?? 'Unknown error'));

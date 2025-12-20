@@ -2,21 +2,21 @@
 
 @section('title', 'Firewall - Hostiqo')
 @section('page-title', 'Firewall')
-@section('page-description', 'Manage UFW firewall rules and network security')
+@section('page-description', 'Manage {{ $firewallType === "firewalld" ? "firewalld" : "UFW" }} firewall rules and network security')
 
 @section('page-actions')
-    @if($ufwStatus['enabled'] ?? false)
+    @if($firewallStatus['enabled'] ?? false)
         <form action="{{ route('firewall.disable') }}" method="POST" class="d-inline">
             @csrf
             <button type="submit" class="btn btn-warning">
-                <i class="bi bi-shield-slash"></i> Disable UFW
+                <i class="bi bi-shield-slash"></i> Disable {{ $firewallType === 'firewalld' ? 'Firewalld' : 'UFW' }}
             </button>
         </form>
     @else
         <form action="{{ route('firewall.enable') }}" method="POST" class="d-inline">
             @csrf
             <button type="submit" class="btn btn-success">
-                <i class="bi bi-shield-check"></i> Enable UFW
+                <i class="bi bi-shield-check"></i> Enable {{ $firewallType === 'firewalld' ? 'Firewalld' : 'UFW' }}
             </button>
         </form>
     @endif
@@ -42,12 +42,12 @@
     </div>
 @endif
 
-<!-- UFW Status -->
+<!-- Firewall Status -->
 <div class="card mb-4">
     <div class="card-body">
-        <h5>UFW Status</h5>
-        <div class="alert alert-{{ $ufwStatus['enabled'] ?? false ? 'success' : 'warning' }}">
-            Status: <strong>{{ $ufwStatus['enabled'] ?? false ? 'Active' : 'Inactive' }}</strong>
+        <h5>{{ $firewallType === 'firewalld' ? 'Firewalld' : 'UFW' }} Status</h5>
+        <div class="alert alert-{{ $firewallStatus['enabled'] ?? false ? 'success' : 'warning' }}">
+            Status: <strong>{{ $firewallStatus['enabled'] ?? false ? 'Active' : 'Inactive' }}</strong>
         </div>
     </div>
 </div>
