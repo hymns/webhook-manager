@@ -324,6 +324,19 @@ install_prerequisites_rhel() {
             php${version}-php-redis \
             php${version}-php-opcache > /dev/null 2>&1
 
+        # Configure PHP-FPM to use nginx user for socket
+        FPM_CONF="/etc/opt/remi/php${version}/php-fpm.d/www.conf"
+        if [ -f "$FPM_CONF" ]; then
+            sed -i 's/^user = .*/user = nginx/' "$FPM_CONF"
+            sed -i 's/^group = .*/group = nginx/' "$FPM_CONF"
+            sed -i 's/^;listen.owner = .*/listen.owner = nginx/' "$FPM_CONF"
+            sed -i 's/^;listen.group = .*/listen.group = nginx/' "$FPM_CONF"
+            sed -i 's/^listen.owner = .*/listen.owner = nginx/' "$FPM_CONF"
+            sed -i 's/^listen.group = .*/listen.group = nginx/' "$FPM_CONF"
+            # Disable ACL users (overrides owner/group settings)
+            sed -i 's/^listen.acl_users = .*/;listen.acl_users = /' "$FPM_CONF"
+        fi
+
         # Enable and start PHP-FPM service
         systemctl enable php${version}-php-fpm > /dev/null 2>&1
         systemctl start php${version}-php-fpm > /dev/null 2>&1
