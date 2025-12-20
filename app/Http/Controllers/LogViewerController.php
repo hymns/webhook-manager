@@ -3,14 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Models\Website;
-use App\Traits\DetectsOperatingSystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Process;
 
 class LogViewerController extends Controller
 {
-    use DetectsOperatingSystem;
+    /**
+     * Detect if running on RHEL-based system
+     */
+    protected function isRhel(): bool
+    {
+        if (file_exists('/etc/redhat-release')) {
+            return true;
+        }
+        
+        if (file_exists('/etc/os-release')) {
+            $content = file_get_contents('/etc/os-release');
+            if (preg_match('/ID_LIKE=.*rhel|ID_LIKE=.*fedora|ID=.*rocky|ID=.*alma|ID=.*centos/i', $content)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     /**
      * Get PHP-FPM log path based on OS
