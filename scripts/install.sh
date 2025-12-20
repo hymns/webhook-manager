@@ -572,206 +572,270 @@ _EOF_
 #########################################################
 # PHASE 2: Sudoers Configuration
 #########################################################
+
+# Debian/Ubuntu sudoers configuration
+configure_sudoers_debian() {
+    cat > "$SUDOERS_FILE" << 'DEBIAN_EOF'
+# Hostiqo - Automated Management Permissions (Debian/Ubuntu)
+# Web server user: www-data
+
+# Nginx Management
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start nginx
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop nginx
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl reload nginx
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart nginx
+
+# Certbot - SSL Certificate Management
+www-data ALL=(ALL) NOPASSWD: /usr/bin/certbot
+www-data ALL=(ALL) NOPASSWD: /snap/bin/certbot
+
+# PHP-FPM Pool Management
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start php*-fpm
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop php*-fpm
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl reload php*-fpm
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart php*-fpm
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t *
+
+# File Management - PHP-FPM Pool Config Files
+www-data ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
+www-data ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
+www-data ALL=(ALL) NOPASSWD: /bin/rm -f /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
+
+# File Management - Nginx Config Files
+www-data ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/ln -sf /etc/nginx/sites-available/[a-zA-Z0-9._-]* /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-available/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
+
+# Webroot Directory Management
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*/*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod -R [0-9]* /var/www/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod [0-9]* /var/www/[a-zA-Z0-9._-]*/*
+www-data ALL=(ALL) NOPASSWD: /bin/mv /tmp/* /var/www/[a-zA-Z0-9._-]*/*
+www-data ALL=(ALL) NOPASSWD: /bin/rm -rf /var/www/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /usr/bin/find /var/www/[a-zA-Z0-9._-]* *
+
+# Nginx Cache Directory
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/cache/nginx/*
+www-data ALL=(ALL) NOPASSWD: /bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/cache/nginx/*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod -R [0-9]* /var/cache/nginx/*
+
+# PHP-FPM Log Directory
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/log/php*-fpm
+www-data ALL=(ALL) NOPASSWD: /bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/log/php*-fpm
+
+# PM2 Process Control
+www-data ALL=(ALL) NOPASSWD: /usr/bin/pm2
+www-data ALL=(ALL) NOPASSWD: /usr/local/bin/pm2
+www-data ALL=(ALL) NOPASSWD: /bin/mkdir -p /etc/pm2
+www-data ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/pm2/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/pm2/[a-zA-Z0-9._-]*
+www-data ALL=(ALL) NOPASSWD: /bin/rm -f /etc/pm2/[a-zA-Z0-9._-]*
+
+# Supervisor - Process Manager
+www-data ALL=(ALL) NOPASSWD: /bin/cp /tmp/hostiqo-*.conf /etc/supervisor/conf.d/*.conf
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/hostiqo-*.conf /etc/supervisor/conf.d/*.conf
+www-data ALL=(ALL) NOPASSWD: /bin/rm -f /etc/supervisor/conf.d/*.conf
+www-data ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/supervisor/conf.d/*.conf
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl reread
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl update
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl start *
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl stop *
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart *
+www-data ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl status
+www-data ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/supervisor/*.log
+
+# Service Management
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl status *
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl is-active *
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl is-enabled *
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start supervisor
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop supervisor
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart supervisor
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl reload supervisor
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start redis-server
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop redis-server
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart redis-server
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start mysql
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop mysql
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart mysql
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start mariadb
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop mariadb
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart mariadb
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start fail2ban
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop fail2ban
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart fail2ban
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl reload fail2ban
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl start ufw
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl stop ufw
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl restart ufw
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl enable ufw
+www-data ALL=(ALL) NOPASSWD: /bin/systemctl disable ufw
+
+# Journal logs
+www-data ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u * -n * --no-pager
+
+# Git
+www-data ALL=(ALL) NOPASSWD: /usr/bin/git
+
+# UFW Firewall
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/ufw
+www-data ALL=(ALL) NOPASSWD: /usr/sbin/ufw *
+
+# Crontab
+www-data ALL=(ALL) NOPASSWD: /usr/bin/crontab
+www-data ALL=(ALL) NOPASSWD: /usr/bin/crontab *
+
+# Log File Access
+www-data ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/*
+www-data ALL=(ALL) NOPASSWD: /usr/bin/tail /var/log/*
+www-data ALL=(ALL) NOPASSWD: /usr/bin/cat /var/log/*
+www-data ALL=(ALL) NOPASSWD: /usr/bin/truncate -s 0 *
+DEBIAN_EOF
+}
+
+# RHEL/Rocky/Alma sudoers configuration
+configure_sudoers_rhel() {
+    cat > "$SUDOERS_FILE" << 'RHEL_EOF'
+# Hostiqo - Automated Management Permissions (RHEL/Rocky/Alma)
+# Web server user: nginx
+
+# Nginx Management
+nginx ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start nginx
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop nginx
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart nginx
+
+# Certbot - SSL Certificate Management
+nginx ALL=(ALL) NOPASSWD: /usr/bin/certbot
+
+# PHP-FPM Pool Management (Remi style)
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start php*-php-fpm
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop php*-php-fpm
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload php*-php-fpm
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart php*-php-fpm
+
+# File Management - PHP-FPM Pool Config Files (Remi)
+nginx ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
+nginx ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
+
+# File Management - Nginx Config Files
+nginx ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
+nginx ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
+
+# Webroot Directory Management
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/www/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/www/[a-zA-Z0-9._-]*/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod -R [0-9]* /var/www/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod [0-9]* /var/www/[a-zA-Z0-9._-]*/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mv /tmp/* /var/www/[a-zA-Z0-9._-]*/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/rm -rf /var/www/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/find /var/www/[a-zA-Z0-9._-]* *
+
+# Nginx Cache Directory
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/cache/nginx/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/cache/nginx/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod -R [0-9]* /var/cache/nginx/*
+
+# PHP-FPM Log Directory
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/log/php*-fpm
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/log/php*-fpm
+
+# PM2 Process Control
+nginx ALL=(ALL) NOPASSWD: /usr/bin/pm2
+nginx ALL=(ALL) NOPASSWD: /usr/local/bin/pm2
+nginx ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /etc/pm2
+nginx ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/pm2/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/pm2/[a-zA-Z0-9._-]*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/pm2/[a-zA-Z0-9._-]*
+
+# Supervisor - Process Manager
+nginx ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/hostiqo-*.ini /etc/supervisord.d/*.ini
+nginx ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/supervisord.d/*.ini
+nginx ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/supervisord.d/*.ini
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl reread
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl update
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl start *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl stop *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl status
+nginx ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/supervisor/*.log
+
+# Service Management
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl status *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl is-active *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl is-enabled *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start supervisord
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop supervisord
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart supervisord
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload supervisord
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start redis
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop redis
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart redis
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start mariadb
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop mariadb
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart mariadb
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start fail2ban
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop fail2ban
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart fail2ban
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload fail2ban
+
+# Firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/firewall-cmd
+nginx ALL=(ALL) NOPASSWD: /usr/bin/firewall-cmd *
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl start firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl stop firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl enable firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl disable firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl restart firewalld
+nginx ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload firewalld
+
+# Journal logs
+nginx ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u * -n * --no-pager
+
+# Git
+nginx ALL=(ALL) NOPASSWD: /usr/bin/git
+
+# Crontab
+nginx ALL=(ALL) NOPASSWD: /usr/bin/crontab
+nginx ALL=(ALL) NOPASSWD: /usr/bin/crontab *
+
+# Log File Access
+nginx ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/tail /var/log/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/cat /var/log/*
+nginx ALL=(ALL) NOPASSWD: /usr/bin/truncate -s 0 *
+
+# SELinux
+nginx ALL=(ALL) NOPASSWD: /usr/sbin/semanage fcontext *
+nginx ALL=(ALL) NOPASSWD: /usr/sbin/restorecon *
+nginx ALL=(ALL) NOPASSWD: /usr/sbin/setsebool *
+RHEL_EOF
+}
+
 configure_sudoers() {
     print_header "Phase 2: Configuring Sudoers"
     
     SUDOERS_FILE="/etc/sudoers.d/hostiqo-manager"
     
-    print_info "Creating sudoers configuration for $WEB_USER..."
-    
-    # Determine systemctl path based on OS
+    print_info "Creating sudoers configuration for $WEB_USER ($OS_FAMILY)..."
+
     if [ "$OS_FAMILY" = "rhel" ]; then
-        SYSTEMCTL_PATH="/usr/bin/systemctl"
+        configure_sudoers_rhel
     else
-        SYSTEMCTL_PATH="/bin/systemctl"
+        configure_sudoers_debian
     fi
-
-    cat > "$SUDOERS_FILE" << EOF
-# Hostiqo - Automated Management Permissions
-# Web server user: $WEB_USER
-# OS Family: $OS_FAMILY
-
-# Nginx Management
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/nginx -t
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start nginx
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop nginx
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload nginx
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart nginx
-
-# Certbot - SSL Certificate Management
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/certbot
-$WEB_USER ALL=(ALL) NOPASSWD: /snap/bin/certbot
-
-# PHP-FPM Pool Management (Debian style)
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/php-fpm* -t *
-
-# PHP-FPM Pool Management (RHEL/Remi style)
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start php*-php-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop php*-php-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload php*-php-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart php*-php-fpm
-
-# File Management - PHP-FPM Pool Config Files (Debian)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/php/[78].[0-9]*/fpm/pool.d/[a-zA-Z0-9._-]*.conf
-
-# File Management - PHP-FPM Pool Config Files (RHEL/Remi)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/opt/remi/php*/php-fpm.d/[a-zA-Z0-9._-]*.conf
-
-# File Management - Nginx Config Files (Debian style)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/sites-available/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/nginx/sites-available/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/ln -sf /etc/nginx/sites-available/[a-zA-Z0-9._-]* /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-available/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/sites-enabled/[a-zA-Z0-9._-]*
-
-# File Management - Nginx Config Files (RHEL style)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/nginx/conf.d/[a-zA-Z0-9._-]*.conf
-
-# Webroot Directory Management
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/www/[a-zA-Z0-9._-]*/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*/*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod -R [0-9]* /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod [0-9]* /var/www/[a-zA-Z0-9._-]*/*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mv /tmp/* /var/www/[a-zA-Z0-9._-]*/*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -rf /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/find /var/www/[a-zA-Z0-9._-]* *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod -R [0-9]* /var/www/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/mv /tmp/* /var/www/[a-zA-Z0-9._-]*/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/rm -rf /var/www/[a-zA-Z0-9._-]*
-
-# Nginx Cache Directory
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/cache/nginx/*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/cache/nginx/*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod -R [0-9]* /var/cache/nginx/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/cache/nginx/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chown -R [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/cache/nginx/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod -R [0-9]* /var/cache/nginx/*
-
-# PHP-FPM Log Directory
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /var/log/php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/log/php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /var/log/php*-fpm
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chown [a-zA-Z0-9_-]*?[a-zA-Z0-9_-]* /var/log/php*-fpm
-
-# PM2 Process Control
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/pm2
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/local/bin/pm2
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/mkdir -p /etc/pm2
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/[a-zA-Z0-9._-]* /etc/pm2/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/pm2/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/pm2/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /etc/pm2
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/[a-zA-Z0-9._-]* /etc/pm2/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/pm2/[a-zA-Z0-9._-]*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/pm2/[a-zA-Z0-9._-]*
-
-# Supervisor - Process Manager (Debian)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/hostiqo-*.conf /etc/supervisor/conf.d/*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/hostiqo-*.conf /etc/supervisor/conf.d/*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/supervisor/conf.d/*.conf
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/supervisor/conf.d/*.conf
-
-# Supervisor - Process Manager (RHEL)
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/cp /tmp/hostiqo-*.ini /etc/supervisord.d/*.ini
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cp /tmp/hostiqo-*.ini /etc/supervisord.d/*.ini
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/rm -f /etc/supervisord.d/*.ini
-$WEB_USER ALL=(ALL) NOPASSWD: /bin/chmod 644 /etc/supervisord.d/*.ini
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/rm -f /etc/supervisord.d/*.ini
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/chmod 644 /etc/supervisord.d/*.ini
-
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl reread
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl update
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl start *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl stop *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl restart *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/supervisorctl status
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/supervisor/*.log
-
-# Service Management
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH status *
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH is-active *
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH is-enabled *
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start supervisor
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop supervisor
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart supervisor
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload supervisor
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start supervisord
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop supervisord
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart supervisord
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload supervisord
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start redis-server
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop redis-server
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart redis-server
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start redis
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop redis
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart redis
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start mysql
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop mysql
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart mysql
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start mariadb
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop mariadb
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart mariadb
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start fail2ban
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop fail2ban
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart fail2ban
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload fail2ban
-
-# Journal logs
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/journalctl -u * -n * --no-pager
-
-# Git
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/git
-
-# UFW Firewall (Debian)
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/ufw
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/ufw *
-
-# Firewalld (RHEL)
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/firewall-cmd
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/firewall-cmd *
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH start firewalld
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH stop firewalld
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH enable firewalld
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH disable firewalld
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH restart firewalld
-$WEB_USER ALL=(ALL) NOPASSWD: $SYSTEMCTL_PATH reload firewalld
-
-# Crontab
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/crontab
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/crontab *
-
-# Log File Access
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/tail -n * /var/log/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/tail /var/log/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/cat /var/log/*
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/bin/truncate -s 0 *
-
-# SELinux (RHEL)
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/semanage fcontext *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/restorecon *
-$WEB_USER ALL=(ALL) NOPASSWD: /usr/sbin/setsebool *
-EOF
 
     chmod 0440 "$SUDOERS_FILE"
     
