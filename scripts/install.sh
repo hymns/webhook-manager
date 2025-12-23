@@ -1435,6 +1435,20 @@ SSLEOF
         print_success "SELinux context configured"
     fi
 
+    # Update APP_URL in .env based on domain and SSL setting
+    print_info "Updating APP_URL in .env..."
+    if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
+        APP_URL="https://$DOMAIN_NAME"
+    else
+        APP_URL="http://$DOMAIN_NAME"
+    fi
+    sed -i "s|APP_URL=.*|APP_URL=$APP_URL|" "$APP_DIR/.env"
+    print_success "APP_URL set to $APP_URL"
+    
+    # Clear config cache to apply new APP_URL
+    cd "$APP_DIR"
+    sudo -u $WEB_USER php artisan config:clear > /dev/null 2>&1 || true
+
     # Start services
     print_info "Starting services..."
     supervisorctl start hostiqo-queue:* > /dev/null 2>&1 || true
