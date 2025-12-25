@@ -99,6 +99,12 @@
                 <a class="nav-link {{ request()->routeIs('files.*') ? 'active' : '' }}" href="{{ route('files.index') }}">
                     <i class="bi bi-folder me-2"></i> File Manager
                 </a>
+                
+                <!-- Version Info -->
+                <hr style="border-top: 1px solid rgba(255,255,255,0.1); margin: 1rem 0;">
+                <div class="text-center" style="padding: 0.5rem 1rem; color: rgba(255,255,255,0.5); font-size: 0.75rem;">
+                    v{{ config('app.version') }}
+                </div>
             </nav>
         </div>
         
