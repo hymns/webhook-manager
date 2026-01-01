@@ -299,6 +299,85 @@ OPCACHE
     print_info "Installing fail2ban..."
     apt-get install -y fail2ban > /dev/null 2>&1
     print_success "fail2ban installed"
+    
+    # Install and configure logrotate
+    print_info "Installing logrotate..."
+    apt-get install -y logrotate > /dev/null 2>&1
+    print_success "logrotate installed"
+    
+    print_info "Configuring logrotate for Hostiqo..."
+    cat > /etc/logrotate.d/hostiqo << 'LOGROTATE_EOF'
+# Hostiqo Log Rotation Configuration
+# Keep logs for 7 days, max 100MB per file
+
+/var/log/nginx/hostiqo-*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        [ -f /var/run/nginx.pid ] && kill -USR1 $(cat /var/run/nginx.pid)
+    endscript
+}
+
+/var/www/hostiqo/storage/logs/*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}
+
+/var/log/php*-fpm/*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /usr/lib/php/php-fpm-socket-helper install /run/php/php-fpm.sock /etc/php/*/fpm/pool.d/www.conf 70 || true
+    endscript
+}
+LOGROTATE_EOF
+    print_success "logrotate configured for Hostiqo"
+    
+    # Configure log rotation for system logs
+    print_info "Configuring logrotate for system logs..."
+    cat > /etc/logrotate.d/rsyslog << 'LOGROTATE'
+/var/log/syslog
+/var/log/mail.log
+/var/log/kern.log
+/var/log/auth.log
+/var/log/user.log
+/var/log/cron.log
+{
+        rotate 7
+        daily
+        maxsize 100M
+        missingok
+        notifempty
+        compress
+        delaycompress
+        sharedscripts
+        postrotate
+                /usr/lib/rsyslog/rsyslog-rotate
+        endscript
+}
+LOGROTATE
+    print_success "System log rotation configured"
 
     # Create web directories
     print_info "Creating web directories..."
@@ -499,6 +578,85 @@ OPCACHE
     print_info "Installing fail2ban..."
     $PKG_MANAGER install -y fail2ban > /dev/null 2>&1
     print_success "fail2ban installed"
+    
+    # Install and configure logrotate
+    print_info "Installing logrotate..."
+    $PKG_MANAGER install -y logrotate > /dev/null 2>&1
+    print_success "logrotate installed"
+    
+    print_info "Configuring logrotate for Hostiqo..."
+    cat > /etc/logrotate.d/hostiqo << 'LOGROTATE_EOF'
+# Hostiqo Log Rotation Configuration
+# Keep logs for 7 days, max 100MB per file
+
+/var/log/nginx/hostiqo-*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        [ -f /var/run/nginx.pid ] && kill -USR1 $(cat /var/run/nginx.pid)
+    endscript
+}
+
+/var/www/hostiqo/storage/logs/*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+}
+
+/var/opt/remi/php*/log/php-fpm/*.log {
+    daily
+    maxage 7
+    maxsize 100M
+    rotate 7
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        /bin/systemctl reload php*-php-fpm > /dev/null 2>&1 || true
+    endscript
+}
+LOGROTATE_EOF
+    print_success "logrotate configured for Hostiqo"
+    
+    # Configure log rotation for system logs
+    print_info "Configuring logrotate for system logs..."
+    cat > /etc/logrotate.d/rsyslog << 'LOGROTATE'
+/var/log/syslog
+/var/log/mail.log
+/var/log/kern.log
+/var/log/auth.log
+/var/log/user.log
+/var/log/cron.log
+{
+        rotate 7
+        daily
+        maxsize 100M
+        missingok
+        notifempty
+        compress
+        delaycompress
+        sharedscripts
+        postrotate
+                /usr/lib/rsyslog/rsyslog-rotate
+        endscript
+}
+LOGROTATE
+    print_success "System log rotation configured"
 
     # Create web directories
     print_info "Creating web directories..."
